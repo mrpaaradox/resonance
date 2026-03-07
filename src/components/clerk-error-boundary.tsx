@@ -30,7 +30,7 @@ export class ClerkErrorBoundary extends Component<Props, State> {
       }
 
       return (
-        <div className="flex min-h-[400px] flex-col items-center justify-center p-4">
+        <div className="flex min-h-100 flex-col items-center justify-center p-4">
           <div className="max-w-md text-center">
             <div className="mb-4 flex justify-center">
               <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted">
