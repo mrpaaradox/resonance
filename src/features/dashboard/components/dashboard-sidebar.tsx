@@ -102,7 +102,7 @@ export function DashBoardSidebar() {
     },
     {
       title: "Explore voices",
-      url: "/voice",
+      url: "/voices",
       icon: LayoutGrid,
     },
     {

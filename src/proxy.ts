@@ -14,6 +14,8 @@ const isKnownRoute = createRouteMatcher([
   "/sign-up(.*)",
   "/offline(.*)",
   "/org-selection(.*)",
+  "/text-to-speech(.*)",
+  "/voices(.*)",
 ]);
 
 function isClerkDown(): boolean {
