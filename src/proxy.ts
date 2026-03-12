@@ -17,7 +17,6 @@ const isKnownRoute = createRouteMatcher([
   "/org-selection(.*)",
   "/text-to-speech(.*)",
   "/voices(.*)",
-  "/test(.*)",
 ]);
 
 function isClerkDown(): boolean {
