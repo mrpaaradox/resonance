@@ -1,15 +1,31 @@
 "use client";
 
-import {  Pause, Play } from "lucide-react";
-import { useRef, useState, useEffect } from "react";
+import { Pause, Play, Download, Redo, Undo } from "lucide-react";
+import { useState } from "react";
 
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { VoiceAvatar } from "@/components/voice-avatar/voice-avatar";
+import { Spinner } from "@/components/ui/spinner";
+import { cn } from "@/lib/utils";
+
+import { useWaveSurfer } from "../hooks/use-wavesurfer";
 
 type VoicePreviewPanelVoice = {
   id?: string;
   name: string;
 };
+
+function formatTime(seconds: number): string {
+  const hrs = Math.floor(seconds / 3600);
+  const mins = Math.floor((seconds % 3600) / 60);
+  const secs = Math.floor(seconds % 60);
+
+  if (hrs > 0) {
+    return `${hrs}:${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
+  }
+  return `${mins}:${secs.toString().padStart(2, "0")}`;
+}
 
 export function VoicePreviewPanel({
   audioUrl,
@@ -20,44 +36,43 @@ export function VoicePreviewPanel({
   voice: VoicePreviewPanelVoice | null;
   text: string;
 }) {
+  const [isDownloading, setIsDownloading] = useState(false);
   const selectedVoiceName = voice?.name ?? null;
   const selectedVoiceSeed = voice?.id ?? null;
 
-  const audioRef = useRef<HTMLAudioElement | null>(null);
-  const [isPlaying, setIsPlaying] = useState(false);
+  const {
+    containerRef,
+    isPlaying,
+    isReady,
+    currentTime,
+    duration,
+    togglePlayPause,
+    seekForward,
+    seekBackward,
+  } = useWaveSurfer({
+    url: audioUrl,
+    autoplay: true,
+  });
 
-  useEffect(() => {
-    const audio = audioRef.current;
-    if (!audio) return;
+  const handleDownload = () => {
+    setIsDownloading(true);
 
-    const handlePlay = () => setIsPlaying(true);
-    const handlePause = () => setIsPlaying(false);
-    const handleEnded = () => setIsPlaying(false);
+    const safeName =
+      text
+        .slice(0, 50)
+        .trim()
+        .replace(/[^a-zA-Z0-9]+/g, "-")
+        .replace(/^-|-$/g, "")
+        .toLowerCase() || "speech";
 
-    audio.addEventListener("play", handlePlay);
-    audio.addEventListener("pause", handlePause);
-    audio.addEventListener("ended", handleEnded);
+    const link = document.createElement("a");
+    link.href = audioUrl;
+    link.download = `${safeName}.wav`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
 
-    audio.play().catch(() => {});
-
-    return () => {
-      audio.removeEventListener("play", handlePlay);
-      audio.removeEventListener("pause", handlePause);
-      audio.removeEventListener("ended", handleEnded);
-    };
-  }, [audioUrl]);
-
-  const togglePlayPause = () => {
-    const audio = audioRef.current;
-    if (!audio) {
-      return;
-    }
-
-    if (isPlaying) {
-      audio.pause();
-    } else {
-      audio.play();
-    }
+    setTimeout(() => setIsDownloading(false), 1000);
   };
 
   return (
@@ -69,7 +84,34 @@ export function VoicePreviewPanel({
 
       {/* Content */}
       <div className="relative flex flex-1 items-center justify-center">
-        <audio ref={audioRef} src={audioUrl} />
+        {!isReady && (
+          <div className="absolute inset-0 z-10 flex items-center justify-center">
+            <Badge
+              variant="outline"
+              className="gap-2 bg-background/90 px-3 py-1.5 text-sm text-muted-foreground shadow-sm"
+            >
+              <Spinner className="size-4" />
+              <span>Loading audio...</span>
+            </Badge>
+          </div>
+        )}
+        <div
+          ref={containerRef}
+          className={cn(
+            "w-full cursor-pointer transition-opacity duration-200",
+            !isReady && "opacity-0",
+          )}
+        />
+      </div>
+
+      {/* Time display */}
+      <div className="flex items-center justify-center">
+        <p className="text-3xl font-semibold tabular-nums tracking-tight text-foreground">
+          {formatTime(currentTime)}&nbsp;
+          <span className="text-muted-foreground">
+            /&nbsp;{formatTime(duration)}
+          </span>
+        </p>
       </div>
 
       {/* Footer */}
@@ -92,8 +134,19 @@ export function VoicePreviewPanel({
             )}
           </div>
 
-          {/* Player Controls */}
+          {/* Player controls */}
           <div className="flex items-center justify-center gap-3">
+            <Button
+              variant="ghost"
+              size="icon-lg"
+              className="flex-col"
+              onClick={() => seekBackward(10)}
+              disabled={!isReady}
+            >
+              <Undo className="size-4 -mb-1" />
+              <span className="text-[10px] font-medium">10</span>
+            </Button>
+
             <Button
               variant="default"
               size="icon-lg"
@@ -106,10 +159,31 @@ export function VoicePreviewPanel({
                 <Play className="fill-background" />
               )}
             </Button>
+
+            <Button
+              variant="ghost"
+              size="icon-lg"
+              className="flex-col"
+              onClick={() => seekForward(10)}
+              disabled={!isReady}
+            >
+              <Redo className="size-4 -mb-1" />
+              <span className="text-[10px] font-medium">10</span>
+            </Button>
           </div>
 
-          {/* Spacer */}
-          <div />
+          {/* Download */}
+          <div className="flex justify-end">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleDownload}
+              disabled={isDownloading}
+            >
+              <Download className="size-4" />
+              Download
+            </Button>
+          </div>
         </div>
       </div>
     </div>

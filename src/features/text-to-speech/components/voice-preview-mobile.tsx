@@ -1,7 +1,7 @@
 "use client";
 
-import { Download, Pause, Play } from "lucide-react";
 import { useRef, useState, useEffect } from "react";
+import { Pause, Play, Download } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { VoiceAvatar } from "@/components/voice-avatar/voice-avatar";
@@ -58,9 +58,7 @@ export function VoicePreviewMobile({
 
   const togglePlayPause = () => {
     const audio = audioRef.current;
-    if (!audio) {
-      return;
-    }
+    if (!audio) return;
 
     if (isPlaying) {
       audio.pause();
@@ -69,10 +67,27 @@ export function VoicePreviewMobile({
     }
   };
 
+  const handleDownload = () => {
+    const safeName =
+      text
+        .slice(0, 50)
+        .trim()
+        .replace(/[^a-zA-Z0-9]+/g, "-")
+        .replace(/^-|-$/g, "")
+        .toLowerCase() || "speech";
+
+    const link = document.createElement("a");
+    link.href = audioUrl;
+    link.download = `${safeName}.wav`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   if (!audioUrl) return null;
 
   return (
-    <div className="border-t p-4 lg:hidden">
+    <div className="border-t lg:hidden p-4">
       <audio ref={audioRef} src={audioUrl} />
       <div className="grid grid-cols-[1fr_auto] items-center gap-4">
         <div className="min-w-0">
@@ -88,7 +103,11 @@ export function VoicePreviewMobile({
             </div>
           )}
         </div>
+
         <div className="flex items-center gap-2">
+          <Button variant="ghost" size="icon" onClick={handleDownload}>
+            <Download className="size-4" />
+          </Button>
           <Button
             variant="default"
             size="icon"
