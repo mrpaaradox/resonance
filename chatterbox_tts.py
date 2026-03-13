@@ -25,8 +25,8 @@
 import os
 import modal
 
-R2_BUCKET_NAME = "resonance-app"
-R2_ACCOUNT_ID = "fa3e0ee83f27bbefee1b73879bfeca9e"
+R2_BUCKET_NAME = <bucket name >
+R2_ACCOUNT_ID = <account id >
 
 if not R2_BUCKET_NAME or not R2_ACCOUNT_ID:
     raise ValueError(
