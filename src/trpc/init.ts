@@ -21,7 +21,7 @@ export const createCallerFactory = t.createCallerFactory;
 export const baseProcedure = t.procedure;
 
 // Authenticated Procedure - calls auth() only when needed
-export const authProcedure = t.procedure.use(async ({ next }) => {
+export const authProcedure = baseProcedure.use(async ({ next }) => {
   const { userId } = await auth();
 
   if (!userId) {
@@ -39,7 +39,7 @@ export const authProcedure = t.procedure.use(async ({ next }) => {
 
 // Organization Procedure - required userId and orgId
 
-export const orgProcedure = t.procedure.use(async ({ next }) => {
+export const orgProcedure = baseProcedure.use(async ({ next }) => {
   const { userId, orgId } = await auth();
 
   if (!userId) {

@@ -1,83 +1,42 @@
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 
-const isPublicRoute = createRouteMatcher([
-  "/",
-  "/sign-in(.*)",
-  "/sign-up(.*)",
-  "/offline(.*)",
-  "/api/trpc(.*)",
-]);
+const isPublicRoute = createRouteMatcher(["/sign-in(.*)", "/sign-up(.*)"]);
 
-const isKnownRoute = createRouteMatcher([
-  "/",
-  "/sign-in(.*)",
-  "/sign-up(.*)",
-  "/offline(.*)",
-  "/org-selection(.*)",
-  "/text-to-speech(.*)",
-  "/voices(.*)",
-]);
-
-function isClerkDown(): boolean {
-  return process.env.CLERK_DOWN === "true";
-}
-
-function isClerkDownError(error: unknown): boolean {
-  if (error instanceof Error) {
-    const message = error.message.toLowerCase();
-    return (
-      message.includes("clerk") ||
-      message.includes("service unavailable") ||
-      message.includes("503") ||
-      message.includes("502") ||
-      message.includes("econnrefused")
-    );
-  }
-  return false;
-}
+const isOrgSelectionRoute = createRouteMatcher(["/org-selection(.*)"]);
 
 export default clerkMiddleware(async (auth, req) => {
-  const pathname = req.nextUrl.pathname;
+  const { userId, orgId } = await auth();
 
-  if (isClerkDown()) {
-    if (!pathname.startsWith("/offline")) {
-      return NextResponse.redirect(new URL("/offline", req.url));
-    }
+  // Allow public routes
+  if (isPublicRoute(req)) {
     return NextResponse.next();
   }
 
-  try {
-    const { userId, orgId } = await auth();
-
-    if (isPublicRoute(req)) {
-      return NextResponse.next();
-    }
-
-    if (!userId) {
-      return NextResponse.redirect(new URL("/sign-in", req.url));
-    }
-
-    if (!isKnownRoute(req)) {
-      return NextResponse.redirect(new URL("/", req.url));
-    }
-
-    if (userId && !orgId) {
-      return NextResponse.redirect(new URL("/org-selection", req.url));
-    }
-
-    return NextResponse.next();
-  } catch (error) {
-    if (isClerkDownError(error)) {
-      return NextResponse.redirect(new URL("/offline", req.url));
-    }
-    throw error;
+  // Protect non-public routes
+  if (!userId) {
+    await auth.protect();
   }
+
+  // Allow org selection page
+  if (isOrgSelectionRoute(req)) {
+    return NextResponse.next();
+  }
+
+  // For all protected routes, ensure org is selected
+  if (userId && !orgId) {
+    const orgSelection = new URL("/org-selection", req.url);
+    return NextResponse.redirect(orgSelection);
+  }
+
+  return NextResponse.next();
 });
 
 export const config = {
   matcher: [
+    // Skip Next.js internals and all static files, unless found in search params
     "/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)",
+    // Always run for API routes
     "/(api|trpc)(.*)",
   ],
 };
