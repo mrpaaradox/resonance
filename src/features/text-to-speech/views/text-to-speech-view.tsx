@@ -4,7 +4,7 @@ import { useSuspenseQuery } from "@tanstack/react-query";
 import { useTRPC } from "@/trpc/client";
 
 import { SettingsPanel } from "../components/settings-panel";
-import { TextInputPanel } from "../components/text-input-pannel";
+import { TextInputPanel } from "../components/text-input-panel";
 import { VoicePreviewPlaceholder } from "../components/voice-preview-placeholder";
 
 import { TTSVoiceProvider } from "../contexts/tts-voice-speech-context";
