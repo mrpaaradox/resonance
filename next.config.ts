@@ -6,6 +6,9 @@ const nextConfig: NextConfig = {
     root: __dirname,
   },
   devIndicators: false,
+  experimental: {
+    proxyClientMaxBodySize: "20mb",
+  },
 };
 
 export default withSentryConfig(nextConfig, {
