@@ -2,7 +2,7 @@
 
 import { useStore } from "@tanstack/react-form";
 
-import { VOICE_CATEGORY_LABELS } from "@/features/voices/data/vocie-categories";
+import { VOICE_CATEGORY_LABELS } from "@/features/voices/data/voice-categories";
 
 import { Field, FieldLabel } from "@/components/ui/field";
 
