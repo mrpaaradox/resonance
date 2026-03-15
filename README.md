@@ -1,39 +1,142 @@
-Railway: https://resonance-production-9e4f.up.railway.app
+# Resonance
 
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+A voice cloning and text-to-speech (TTS) application built with Next.js. Create, manage, and generate AI-powered voice outputs with ease.
+
+## Tech Stack
+
+- **Framework**: Next.js 16 (App Router)
+- **Language**: TypeScript
+- **Database**: PostgreSQL with Prisma ORM
+- **Authentication**: Clerk
+- **Storage**: Cloudflare R2
+- **Payments**: Polar
+- **API Layer**: tRPC
+- **UI**: Shadcn UI + Radix primitives
+- **Styling**: Tailwind CSS
+
+## Features
+
+- Voice cloning and management
+- Text-to-speech generation
+- Audio recording and playback
+- Organization-based voice scoping
+- Usage tracking and billing
+- Multiple voice categories (audiobook, podcast, narration, etc.)
+
+## Prerequisites
+
+- Node.js 18+
+- pnpm (recommended)
+- PostgreSQL database
+- Cloudflare R2 account (for storage)
+- Clerk account (for authentication)
+- Polar account (for payments)
 
 ## Getting Started
 
-First, run the development server:
+### 1. Clone the repository
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone <repository-url>
+cd resonance
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 2. Install dependencies
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+pnpm install
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### 3. Set up environment variables
 
-## Learn More
+Create a `.env` file in the root directory and configure the following variables:
 
-To learn more about Next.js, take a look at the following resources:
+```env
+# App
+SKIP_ENV_VALIDATION=true
+APP_URL="http://localhost:3000"
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+# Database (Prisma)
+DATABASE_URL="postgres://..."
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+# Clerk Authentication
+NEXT_PUBLIC_CLERK_SIGN_IN_URL=/sign-in
+NEXT_PUBLIC_CLERK_SIGN_UP_URL=/sign-up
+NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL=/
+NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL=/
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_...
+CLERK_SECRET_KEY=sk_test_...
 
-## Deploy on Vercel
+# Cloudflare R2 Storage
+R2_ACCOUNT_ID="..."
+R2_ACCESS_KEY_ID="..."
+R2_SECRET_ACCESS_KEY="..."
+R2_BUCKET_NAME="resonance-app"
+R2_TOKEN="..."
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+# Polar (Payments)
+POLAR_ACCESS_TOKEN=polar_oat_...
+POLAR_SERVER=sandbox
+POLAR_PRODUCT_ID=...
+POLAR_METER_VOICE_CREATION=voice_creation
+POLAR_METER_TTS_GENERATION=tts_generation
+POLAR_METER_TTS_PROPERTY=characters
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
-# resonance
+# ChatterBox (TTS API)
+CHATTERBOX_API_KEY=your-api-key
+CHATTERBOX_API_URL=https://...
+
+# Sentry (Optional - Error tracking)
+SENTRY_AUTH_TOKEN=sntrys_...
+```
+
+### 4. Generate Prisma client
+
+```bash
+pnpm prisma generate
+```
+
+### 5. Run database migrations
+
+```bash
+pnpm prisma migrate dev
+```
+
+### 6. Start the development server
+
+```bash
+pnpm dev
+```
+
+Open [http://localhost:3000](http://localhost:3000) in your browser.
+
+## Available Scripts
+
+| Command | Description |
+|---------|-------------|
+| `pnpm dev` | Start development server |
+| `pnpm build` | Build for production |
+| `pnpm start` | Start production server |
+| `pnpm lint` | Run ESLint |
+| `pnpm prisma studio` | Open Prisma database GUI |
+| `pnpm prisma migrate dev` | Run database migrations |
+
+## Project Structure
+
+```
+resonance/
+├── prisma/              # Database schema and migrations
+├── public/              # Static assets
+├── src/
+│   ├── app/             # Next.js App Router pages
+│   ├── components/      # Shared React components
+│   ├── features/        # Feature-specific code (voices, billing, dashboard)
+│   ├── hooks/           # Custom React hooks
+│   ├── lib/             # Utility functions and clients
+│   └── generated/       # Auto-generated code (Prisma)
+└── package.json
+```
+
+## License
+
+MIT
